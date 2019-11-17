@@ -3,4 +3,4 @@ portforward: portforward.c
 debug: portforward.c
 	$(CC) $(CCOPTS) -g $^ -o $@
 clean:
-	rm -f portforward debug
+	rm -f portforward debug *.so *.o

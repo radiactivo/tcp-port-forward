@@ -3,7 +3,52 @@
  * It was later licensed:  https://github.com/antialize/utils/issues/1
  */
 #include "portforward.h"
+/**/
 
+/**
+ * Send the traffic from src socket to dst socket fuzzing the incoming
+ * content of the packet with radamsa
+ * When done or on any error, this dies and will kill the forked process.
+ */
+void com_fuzz(int src, int dst) 
+{
+    char buf[1024 * 4];
+    int r, i, j;
+
+    r = read(src, buf, 1024 * 4);
+
+    while (r > 0) 
+    {
+        fprintf(stdout, "%d", r);
+        i = 0;
+
+        while (i < r) 
+        {
+            j = write(dst, buf + i, r - i);
+
+            if (j == -1) {
+                DIE("write"); // TODO is errno EPIPE
+            }
+
+            i += j;
+        }
+
+        r = read(src, buf, 1024 * 4);
+    }
+
+    fprintf(stdout, "\n", NULL );
+    fflush(stdout);
+
+    if (r == -1)  {
+        DIE("read");
+    }
+
+    shutdown(src, SHUT_RD);
+    shutdown(dst, SHUT_WR);
+    close(src);
+    close(dst);
+    exit(0);
+}
 
 /**
  * Send the traffic from src socket to dst socket

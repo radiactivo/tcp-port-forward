@@ -10,6 +10,7 @@
 
 #define DIE(msg) perror(msg); exit(1);
 
+void com_fuzz(int src, int dst);
 void com(int src, int dst);
 int open_forwarding_socket(char *forward_name, int forward_port);
 void accept_connection(int server_socket, char *forward_name, int forward_port);
