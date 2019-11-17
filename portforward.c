@@ -154,8 +154,9 @@ int open_listening_port(int server_port)
 
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (server_socket == -1)
+    if (server_socket == -1) {
         perror("socket");
+    }
 
     bzero((char *) &server_address, sizeof(server_address));
     server_address.sin_family = AF_INET;
@@ -163,8 +164,9 @@ int open_listening_port(int server_port)
     server_address.sin_port = htons(server_port);
 
     bind_socket = bind(server_socket, (struct sockaddr *) &server_address, sizeof(server_address));
-    if (bind_socket == -1)
+    if (bind_socket == -1) {
         perror("bind");
+    }
 
     if ( listen(server_socket, 40) == -1) { DIE("listen"); }
 
@@ -193,8 +195,10 @@ void parse_arguments(int argc, char **argv, int *server_port, char **forward_nam
 
     *forward_name = argv[2];
 
-    if (argc == 3)
+    if (argc == 3) 
+    {
         *forward_port = *server_port;
+    }
     else
     {
         *forward_port = atoi(argv[3]);
