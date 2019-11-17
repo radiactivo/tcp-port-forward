@@ -19,7 +19,7 @@ void com_fuzz(int src, int dst)
 
     while (r > 0) 
     {
-        fprintf(stdout, "%d", r);
+        //fprintf(stdout, "%d", r);
         i = 0;
 
         while (i < r) 
@@ -36,8 +36,8 @@ void com_fuzz(int src, int dst)
         r = read(src, buf, 1024 * 4);
     }
 
-    fprintf(stdout, "\n", NULL );
-    fflush(stdout);
+    //fprintf(stdout, "\n", NULL );
+    //fflush(stdout);
 
     if (r == -1)  {
         DIE("read");
@@ -81,7 +81,7 @@ void com(int src, int dst)
         r = read(src, buf, 1024 * 4);
     }
 
-    fprintf(stdout, "\n", NULL );
+    fprintf(stdout, "\n");
     fflush(stdout);
 
     if (r == -1)  {
@@ -232,7 +232,7 @@ void parse_arguments(int argc, char **argv, int *server_port, char **forward_nam
 
     *server_port = atoi(argv[1]);
 
-    if (*server_port < 1 | *server_port > 65000) 
+    if ( (*server_port < 1) | (*server_port > 65000) ) 
     {
         fprintf(stderr, "Listen port is invalid\n");
         exit(1);
@@ -248,7 +248,7 @@ void parse_arguments(int argc, char **argv, int *server_port, char **forward_nam
     {
         *forward_port = atoi(argv[3]);
 
-        if (*forward_port < 1 | *forward_port > 65000) {
+        if ( (*forward_port < 1) | (*forward_port > 65000) ) {
             fprintf(stderr, "Forwarding port is invalid\n");
             exit(1);
         }
