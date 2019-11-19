@@ -19,11 +19,14 @@ void com_fuzz(struct connect_info * sockets)
     //Critical Section 1
     pthread_mutex_lock(&sockets->lock);
 
-    if (sockets->pass == 0) {
+    if (sockets->pass == 0) 
+    {
         src = sockets->client_socket;
         dst = sockets->forward_socket;
         sockets->pass = '\x01';
-    }else {
+    }
+    else
+    {
         src = sockets->forward_socket;
         dst = sockets->client_socket;
     }
@@ -35,7 +38,8 @@ void com_fuzz(struct connect_info * sockets)
     {
         c = strstr(buf, passive_msg_7);
     
-        if ( c != NULL ) {
+        if ( c != NULL )
+        {
             //Open again two threads for the passive mode
            fprintf(stdout,"Never expected ha?\n");
            fflush(stdout);
@@ -48,7 +52,8 @@ void com_fuzz(struct connect_info * sockets)
         {
             j = write(dst, buf + i, r - i);
 
-            if (j == -1) {
+            if (j == -1)
+            {
                 DIE("write"); // TODO is errno EPIPE
             }
 
@@ -58,51 +63,8 @@ void com_fuzz(struct connect_info * sockets)
         r = read(src, buf, 1024 * 4);
     }
 
-    if (r == -1)  {
-        DIE("read");
-    }
-
-    shutdown(src, SHUT_RD);
-    shutdown(dst, SHUT_WR);
-    close(src);
-    close(dst);
-    exit(0);
-}
-
-/**
- * Send the traffic from src socket to dst socket
- *
- * When done or on any error, this dies and will kill the forked process.
- */
-void com(int src, int dst) 
-{
-    char buf[1024 * 4];
-    int r, i, j;
-
-    r = read(src, buf, 1024 * 4);
-
-    while (r > 0) 
+    if (r == -1)
     {
-        i = 0;
-
-        while (i < r) 
-        {
-            j = write(dst, buf + i, r - i);
-
-            if (j == -1) {
-                DIE("write"); // TODO is errno EPIPE
-            }
-
-            i += j;
-        }
-
-        r = read(src, buf, 1024 * 4);
-    }
-
-    fprintf(stdout, "%s\n", buf );
-    fflush(stdout);
-
-    if (r == -1)  {
         DIE("read");
     }
 
@@ -112,7 +74,6 @@ void com(int src, int dst)
     close(dst);
     exit(0);
 }
-
 
 /**
  * Opens a connection to the destination.
@@ -127,7 +88,8 @@ int open_forwarding_socket(char *forward_name, int forward_port)
 
     forward = gethostbyname(forward_name);
 
-    if (forward == NULL) {
+    if (forward == NULL)
+    {
         DIE("gethostbyname");
     }
 
@@ -138,11 +100,13 @@ int open_forwarding_socket(char *forward_name, int forward_port)
 
     forward_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (forward_socket == -1) {
+    if (forward_socket == -1)
+    {
         DIE("socket");
     }
 
-    if (connect(forward_socket, (struct sockaddr *) &forward_address, sizeof(forward_address)) == -1) {
+    if (connect(forward_socket, (struct sockaddr *) &forward_address, sizeof(forward_address)) == -1)
+    {
         DIE("connect");
     }
 
@@ -156,31 +120,17 @@ int open_forwarding_socket(char *forward_name, int forward_port)
  */
 void forward_traffic(int client_socket, char *forward_name, int forward_port)
 {
-    fprintf(stdout, "HI 1\n");
-    fflush(stdout);
-    
     int forward_socket, i=0, err =0;
     pthread_t tid[T];
     pid_t down_pid;
     struct connect_info * sockets;
 
-    fprintf(stdout, "HI 2\n");
-    fflush(stdout);
-
-    if( pthread_mutex_init( (pthread_mutex_t *restrict) &sockets->lock, (const pthread_mutexattr_t *restrict) NULL) ) {
-        fprintf(stdout, "HI ERROR\n");
-        fflush(stdout);
+    if( pthread_mutex_init( (pthread_mutex_t *restrict) &sockets->lock, (const pthread_mutexattr_t *restrict) NULL) )
+    {
         DIE("mutex");
     }
 
-    fprintf(stdout, "HI 3\n");
-    fflush(stdout);
-
     forward_socket = open_forwarding_socket( forward_name, forward_port );
-
-    fprintf(stdout, "HI 4\n");
-    fflush(stdout);
-
     sockets = (struct connect_info *) calloc(1, sizeof(struct connect_info));
     // Fork - child forwards traffic back to client, parent sends from client
     // to forwarded port ====> The parent process will spawn two threads, 
@@ -193,7 +143,8 @@ void forward_traffic(int client_socket, char *forward_name, int forward_port)
     while(i < 2)
     {
         err = pthread_create( &tid[i], NULL, (void *) &com_fuzz, (void *) sockets );
-        if (err != 0){
+        if (err != 0)
+        {
             DIE("thread");
         }
         i++;
@@ -216,18 +167,21 @@ void accept_connection(int server_socket, char *forward_name, int forward_port)
 
     client_socket = accept(server_socket, NULL, NULL);
 
-    if (client_socket == -1) {
+    if (client_socket == -1)
+    {
         DIE("accept");
     }
 
     // Fork - Child handles this connection, parent listens for another
     up_pid = fork();
 
-    if (up_pid == -1) {
+    if (up_pid == -1)
+    {
         DIE("fork");
     }
 
-    if (up_pid == 0) {
+    if (up_pid == 0)
+    {
         forward_traffic(client_socket, forward_name, forward_port);
         exit(1);
     }
@@ -245,7 +199,8 @@ int open_listening_port(int server_port)
 
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (server_socket == -1) {
+    if (server_socket == -1) 
+    {
         DIE("socket");
     }
 
@@ -254,7 +209,8 @@ int open_listening_port(int server_port)
     server_address.sin_addr.s_addr = INADDR_ANY;
     server_address.sin_port = htons(server_port);
 
-    if (bind(server_socket, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) {
+    if (bind(server_socket, (struct sockaddr *) &server_address, sizeof(server_address)) == -1) 
+    {
         DIE("bind");
     }
 
@@ -293,7 +249,8 @@ void parse_arguments(int argc, char **argv, int *server_port, char **forward_nam
     {
         *forward_port = atoi(argv[3]);
 
-        if (*forward_port < 1 | *forward_port > 65000) {
+        if (*forward_port < 1 | *forward_port > 65000) 
+        {
             fprintf(stderr, "Forwarding port is invalid\n");
             exit(1);
         }
@@ -313,7 +270,8 @@ int main(int argc, char **argv)
     signal(SIGCHLD,  SIG_IGN);
     server_socket = open_listening_port(server_port);
 
-    while (1) {
+    while (1) 
+    {
         accept_connection(server_socket, forward_name, forward_port);
     }
 
