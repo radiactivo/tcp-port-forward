@@ -24,8 +24,7 @@ struct connect_info {
 char passive_msg_9[P_MSG9_S] = "229 Entering Extended Passive Mode";
 char passive_msg_7[P_MSG7_S] = "227 Entering Passive Mode";
 
-void com_fuzz(struct connect_info * sockets);
-void com(int src, int dst);
+void com(struct connect_info * sockets);
 int open_forwarding_socket(char *forward_name, int forward_port);
 void accept_connection(int server_socket, char *forward_name, int forward_port);
 int open_listening_port(int server_port);

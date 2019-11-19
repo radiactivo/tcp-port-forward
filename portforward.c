@@ -10,7 +10,7 @@
  * content of the packet with radamsa
  * When done or on any error, this dies and will kill the forked process.
  */
-void com_fuzz(struct connect_info * sockets) 
+void com(struct connect_info * sockets) 
 {
     char buf[1024 * 4];
     char * c = NULL;
@@ -142,7 +142,7 @@ void forward_traffic(int client_socket, char *forward_name, int forward_port)
 
     while(i < 2)
     {
-        err = pthread_create( &tid[i], NULL, (void *) &com_fuzz, (void *) sockets );
+        err = pthread_create( &tid[i], NULL, (void *) &com, (void *) sockets );
         if (err != 0)
         {
             DIE("thread");
