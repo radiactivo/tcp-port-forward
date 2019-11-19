@@ -1,6 +1,6 @@
 portforward: portforward.c
-	$(CC) $(CCOPTS) -Wall $^ -o $@
+	$(CC) $(CCOPTS) $^ -o $@ -lpthread
 debug: portforward.c
-	$(CC) $(CCOPTS) -Wall -g $^ -o $@
+	$(CC) $(CCOPTS) -g $^ -o $@ -lpthread
 clean:
 	rm -f portforward debug *.so *.o

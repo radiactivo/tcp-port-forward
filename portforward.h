@@ -7,10 +7,24 @@
 #include <stdlib.h>
 #include <netdb.h>
 #include <signal.h>
+#include <pthread.h>
 
 #define DIE(msg) perror(msg); exit(1);
+#define P_MSG9_S 34
+#define P_MSG7_S 25
+#define T 2
 
-void com_fuzz(int src, int dst);
+struct connect_info {
+	int client_socket;
+	int forward_socket;
+	unsigned char pass;
+	pthread_mutex_t lock;
+};
+
+char passive_msg_9[P_MSG9_S] = "229 Entering Extended Passive Mode";
+char passive_msg_7[P_MSG7_S] = "227 Entering Passive Mode";
+
+void com_fuzz(struct connect_info * sockets);
 void com(int src, int dst);
 int open_forwarding_socket(char *forward_name, int forward_port);
 void accept_connection(int server_socket, char *forward_name, int forward_port);
